@@ -1,0 +1,9 @@
+{
+  "name": "accessible-payment-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {"dev": "vite", "build": "tsc -b && vite build", "test": "vitest run", "lint": "tsc --noEmit"},
+  "dependencies": {"@vitejs/plugin-react": "latest", "vite": "latest", "react": "latest", "react-dom": "latest"},
+  "devDependencies": {"typescript": "latest", "vitest": "latest", "jsdom": "latest", "@types/react": "latest", "@types/react-dom": "latest"}
+}
