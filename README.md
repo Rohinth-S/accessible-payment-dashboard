@@ -2,6 +2,8 @@
 
 A keyboard-first payment analytics dashboard designed around semantic HTML, predictable focus order, visible validation, and screen-reader announcements. It uses deterministic demo data so the UI is fully runnable without external accounts or payment credentials.
 
+Live demo: https://accessible-payment-dashboard.vercel.app
+
 ## What it demonstrates
 
 - Search and status filtering over a typed transaction model.
