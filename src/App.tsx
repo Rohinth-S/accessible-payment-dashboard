@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import { filterPayments, payments, summarize, type PaymentStatus } from "./domain/payments";
 import { toCsv } from "./domain/csv";
 import { DEFAULT_FILTERS, paginate, parseFilters, segmentRisk, serializeFilters, type PaymentFilters } from "./domain/query";
+import { loadSavedViews, makeSavedView, persistSavedViews, type SavedView } from "./domain/savedViews";
 
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
 function App() {
   const [filters, setFilters] = useState<PaymentFilters>(() => parseFilters(window.location.search));
   const [announce, setAnnounce] = useState("");
+  const [savedViews, setSavedViews] = useState<SavedView[]>(() => loadSavedViews());
   const filteredRows = useMemo(() => filterPayments(payments, filters.query, filters.status), [filters.query, filters.status]);
   const page = useMemo(() => paginate(filteredRows, filters.page, filters.pageSize), [filteredRows, filters.page, filters.pageSize]);
   const totals = useMemo(() => summarize(filteredRows), [filteredRows]);
@@ -29,6 +31,8 @@ function App() {
     URL.revokeObjectURL(url);
     setAnnounce(`Exported ${filteredRows.length} payments as CSV.`);
   };
+  const saveView = () => { const name = window.prompt("Name this saved view"); if (!name?.trim()) return; const next = [makeSavedView(name, filters), ...savedViews.filter((view) => view.name.toLowerCase() !== name.trim().toLowerCase())]; setSavedViews(next); persistSavedViews(next); setAnnounce(`Saved view ${name.trim()}.`); };
+  const selectView = (id: string) => { const view = savedViews.find((entry) => entry.id === id); if (view) update(view.filters); };
 
   return <div className="shell">
     <a className="skip" href="#main">Skip to content</a>
@@ -47,6 +51,8 @@ function App() {
         <div className="panel-head">
           <div><h2 id="transactions-title">Transactions</h2><p className="muted">Search state is shareable through the URL.</p></div>
           <div className="filters">
+            <label>Saved view<select aria-label="Saved view" defaultValue="" onChange={(event) => selectView(event.target.value)}><option value="">Choose a saved view</option>{savedViews.map((view) => <option key={view.id} value={view.id}>{view.name}</option>)}</select></label>
+            <button className="secondary" onClick={saveView}>Save current view</button>
             <label>Search<input value={filters.query} onChange={(event) => update({ query: event.target.value })} placeholder="e.g. Northwind" /></label>
             <label>Status<select value={filters.status} onChange={(event) => update({ status: event.target.value as PaymentFilters["status"] })}><option value="all">All statuses</option><option value="settled">Settled</option><option value="pending">Pending</option><option value="failed">Failed</option><option value="refunded">Refunded</option></select></label>
             <label>Rows<select value={filters.pageSize} onChange={(event) => update({ pageSize: Number(event.target.value) })}><option value="10">10</option><option value="25">25</option><option value="50">50</option></select></label>
